@@ -1,5 +1,14 @@
 const express = require("express");
 const app = express();
+const bodyParser = require("body-parser");
+
+// Enable CORS for all routes
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  next();
+});
 
 const data = {
   ABCD1234: {
@@ -9,7 +18,7 @@ const data = {
   },
 };
 
-const userData = {}
+const userIDs = {};
 
 app.post("/add", (req, res) => {
   const { userID } = req.body;
@@ -18,13 +27,13 @@ app.post("/add", (req, res) => {
   userData.console.log(data);
 });
 
-// Function to generate a random alphanumeric character
-const getRandomChar = (characters) => {
-  return characters[Math.floor(Math.random() * characters.length)];
-}
-
 // Function to generate a unique userID
-const signIn = (username, password) => {
+const generateID = (username) => {
+  // Function to generate a random alphanumeric character
+  const getRandomChar = (characters) => {
+    return characters[Math.floor(Math.random() * characters.length)];
+  }
+
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const numbers = "0123456789";
   let userID = "";
@@ -36,9 +45,9 @@ const signIn = (username, password) => {
       userID += randomAlphabet + randomNumber;
     }
 
-    if (!Object.keys(data).includes(userID)) {
-        data[userID] = {point:0, userName:username, password:password};
-        break;
+    if (!Object.values(userIDs).includes(userID)) {
+      userIDs[username] = userID;
+      break;
     }
     userID = "";
   }
@@ -47,9 +56,39 @@ const signIn = (username, password) => {
 app.post("/login", (req, res) => {
   const { userName, password } = req.body;
   if (data.hasOwnProperty(userName)) {
-    res.status(200).send("success");
+    if (data[userIDs[userName]].password == password) {
+      res.status(200).json({
+        status: "success",
+        message: "success"
+      });
+    } else {
+      res.status(400).json({
+        status: "error",
+        message: "wrong password"
+      });
+    }
   } else {
-    res.status(400).send("UserData not found");
+    res.status(400).json({
+      status: "error",
+      message: "userData not found"
+    });
+  }
+});
+
+app.post('/sign-in', (req, res) => {
+  const { userName, password } = req.body;
+  if (!data.hasOwnProperty(userName)) {
+    const userID = generateID(userName);
+    data[userID] = { point: 0, userName: userName, password: password };
+    res.status(200).json({
+      status: "success",
+      message: "success"
+    })
+  } else {
+    res.status(400).json({
+      status: "error",
+      message: "userData exsists"
+    });
   }
 });
 
@@ -58,5 +97,5 @@ app.listen(3000, () => {
 });
 
 app.get("/", (req, res) => {
-  res.send("Welcome to popop backend");
+  res.send("welcome to popop backend");
 });
