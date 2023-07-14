@@ -2,6 +2,8 @@ const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
 
+app.use(bodyParser.json());
+
 // Enable CORS for all routes
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -18,7 +20,9 @@ const data = {
   },
 };
 
-const userIDs = {};
+const userIDs = {
+  KGH1113: "ABCD1234",
+};
 
 app.post("/add", (req, res) => {
   const { userID } = req.body;
@@ -32,7 +36,7 @@ const generateID = (username) => {
   // Function to generate a random alphanumeric character
   const getRandomChar = (characters) => {
     return characters[Math.floor(Math.random() * characters.length)];
-  }
+  };
 
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const numbers = "0123456789";
@@ -51,43 +55,43 @@ const generateID = (username) => {
     }
     userID = "";
   }
-}
+};
 
 app.post("/login", (req, res) => {
   const { userName, password } = req.body;
-  if (data.hasOwnProperty(userName)) {
+  if (data.hasOwnProperty(userIDs[userName])) {
     if (data[userIDs[userName]].password == password) {
       res.status(200).json({
         status: "success",
-        message: "success"
+        message: "success",
       });
     } else {
       res.status(400).json({
         status: "error",
-        message: "wrong password"
+        message: "wrong password",
       });
     }
   } else {
     res.status(400).json({
       status: "error",
-      message: "userData not found"
+      message: "userData not found",
     });
   }
 });
 
-app.post('/sign-in', (req, res) => {
+app.post("/sign-in", (req, res) => {
   const { userName, password } = req.body;
-  if (!data.hasOwnProperty(userName)) {
+  if (!data.hasOwnProperty(userIDs[userName])) {
     const userID = generateID(userName);
     data[userID] = { point: 0, userName: userName, password: password };
     res.status(200).json({
       status: "success",
-      message: "success"
-    })
+      message: "success",
+    });
   } else {
     res.status(400).json({
       status: "error",
-      message: "userData exsists"
+      message: "userData exsists",
     });
   }
 });
