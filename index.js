@@ -14,7 +14,7 @@ app.use((req, res, next) => {
 
 const data = {
   ABCD1234: {
-    point: 12,
+    point: 13,
     userName: "KGH1113",
     password: "password1234",
   },
@@ -24,11 +24,19 @@ const userIDs = {
   KGH1113: "ABCD1234",
 };
 
+app.post("/get-point", (req, res) => {
+  const { userID } = req.body;
+  res.json(data[userID].point);
+});
+
 app.post("/add", (req, res) => {
   const { userID } = req.body;
   const userData = data[userID];
   userData.point++;
-  userData.console.log(data);
+  res.status(200).send({
+    status: "success",
+    message: "success",
+  });
 });
 
 // Function to generate a unique userID
@@ -51,7 +59,7 @@ const generateID = (username) => {
 
     if (!Object.values(userIDs).includes(userID)) {
       userIDs[username] = userID;
-      break;
+      return userID;
     }
     userID = "";
   }
@@ -64,6 +72,7 @@ app.post("/login", (req, res) => {
       res.status(200).json({
         status: "success",
         message: "success",
+        userID: userIDs[userName],
       });
     } else {
       res.status(400).json({
