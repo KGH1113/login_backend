@@ -14,7 +14,6 @@ app.use((req, res, next) => {
 
 const data = {
   ABCD1234: {
-    point: 13,
     userName: "KGH1113",
     password: "password1234",
   },
@@ -23,21 +22,6 @@ const data = {
 const userIDs = {
   KGH1113: "ABCD1234",
 };
-
-app.post("/get-point", (req, res) => {
-  const { userID } = req.body;
-  res.json(data[userID].point);
-});
-
-app.post("/add", (req, res) => {
-  const { userID } = req.body;
-  const userData = data[userID];
-  userData.point++;
-  res.status(200).send({
-    status: "success",
-    message: "success",
-  });
-});
 
 // Function to generate a unique userID
 const generateID = (username) => {
@@ -92,7 +76,7 @@ app.post("/sign-in", (req, res) => {
   const { userName, password } = req.body;
   if (!data.hasOwnProperty(userIDs[userName])) {
     const userID = generateID(userName);
-    data[userID] = { point: 0, userName: userName, password: password };
+    data[userID] = { userName: userName, password: password };
     res.status(200).json({
       status: "success",
       message: "success",
